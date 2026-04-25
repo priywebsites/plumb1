@@ -189,11 +189,11 @@ function Home() {
             <img
               src={heroImg}
               alt="Plumbing professionals working under a Winnipeg kitchen sink"
-              className="w-full h-full object-cover opacity-40"
+              className="w-full h-full object-cover opacity-60"
             />
-            {/* Soft left-to-right wash so the headline stays readable while the photo
-                still reads through clearly on the right side. */}
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
+            {/* Lighter wash so the photo reads through more clearly while the
+                headline on the left stays comfortably readable. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/10" />
             <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/0 to-background/60 md:hidden" />
           </div>
           
@@ -326,40 +326,42 @@ function Home() {
         </section>
 
         {/* Featured Service Photo — sits between Services and How It Works.
-            Tightly cropped image with a short value-prop overlay so it works
-            as a visual break without adding much vertical space. */}
-        <section className="relative bg-slate-900">
+            On mobile the photo sits on top with the headline / CTAs on a solid
+            dark panel below it (more readable than overlay text on a small
+            image). On desktop the photo and the text-panel sit side-by-side. */}
+        <section className="bg-slate-900">
           <div className="container mx-auto px-4 py-10 md:py-16">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-800 max-w-6xl mx-auto">
-              <img
-                src={secondImg}
-                alt="FlowGuard plumber servicing a residential water heater in Winnipeg"
-                className="w-full h-[280px] sm:h-[360px] md:h-[440px] object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/55 to-transparent" />
-              <div className="absolute inset-0 flex items-center">
-                <div className="px-5 md:px-10 max-w-xl text-white">
-                  <Badge className="mb-3 md:mb-4 bg-primary/90 hover:bg-primary border-0">
-                    Water Heaters · Repairs · Installs
-                  </Badge>
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 md:mb-4">
-                    Done right the first time, by people who care.
-                  </h3>
-                  <p className="text-sm md:text-base text-slate-200 mb-5 md:mb-6 leading-relaxed">
-                    Whether it's a worn-out water heater or a stubborn leak under the sink, we walk you through the fix and quote it before any work begins.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button asChild size="lg" className="h-11 md:h-12">
-                      <a href={`tel:${PHONE_TEL}`}>
-                        <Phone className="mr-2 h-4 w-4" />
-                        Call {PHONE_DISPLAY}
-                      </a>
-                    </Button>
-                    <Button onClick={() => scrollTo('request-service')} size="lg" variant="secondary" className="h-11 md:h-12">
-                      Request Service
-                    </Button>
-                  </div>
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-800 max-w-6xl mx-auto bg-slate-900 grid grid-cols-1 md:grid-cols-5">
+              <div className="md:col-span-3 relative">
+                <img
+                  src={secondImg}
+                  alt="FlowGuard plumber servicing a residential water heater in Winnipeg"
+                  className="w-full h-[260px] sm:h-[340px] md:h-full md:min-h-[420px] object-cover block"
+                  loading="lazy"
+                />
+                {/* Soft right-edge fade so the photo blends into the dark text panel on desktop. */}
+                <div className="hidden md:block absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-slate-900" />
+              </div>
+              <div className="md:col-span-2 p-6 sm:p-8 md:p-10 text-white flex flex-col justify-center">
+                <Badge className="mb-4 bg-primary/90 hover:bg-primary border-0 w-fit">
+                  Water Heaters · Repairs · Installs
+                </Badge>
+                <h3 className="text-2xl sm:text-3xl font-bold leading-tight mb-3">
+                  Done right the first time, by people who care.
+                </h3>
+                <p className="text-sm md:text-base text-slate-300 mb-6 leading-relaxed">
+                  Whether it's a worn-out water heater or a stubborn leak under the sink, we walk you through the fix and quote it before any work begins.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button asChild size="lg" className="h-11 md:h-12">
+                    <a href={`tel:${PHONE_TEL}`}>
+                      <Phone className="mr-2 h-4 w-4" />
+                      Call {PHONE_DISPLAY}
+                    </a>
+                  </Button>
+                  <Button onClick={() => scrollTo('request-service')} size="lg" variant="secondary" className="h-11 md:h-12">
+                    Request Service
+                  </Button>
                 </div>
               </div>
             </div>
@@ -406,10 +408,12 @@ function Home() {
           </div>
         </section>
 
-        {/* Local Pros Section — uses the supplied photo of plumbing professionals */}
-        <section className="py-16 md:py-24 bg-white">
+        {/* Local Pros Section — uses the supplied photo of plumbing professionals.
+            Tightened vertical spacing so the Quote First badge below the photo
+            sits closer to the next section. */}
+        <section className="py-10 md:py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center max-w-6xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -714,17 +718,13 @@ function Home() {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">Serving Winnipeg Homeowners</h2>
-                <p className="text-lg text-slate-600 mb-8">
-                  We provide residential plumbing help across {SERVICE_AREA}, including St. Vital, Transcona, St. James, Fort Garry, River Heights, North Kildonan, Southdale, Sage Creek, and nearby areas.
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">Serving All of Winnipeg</h2>
+                <p className="text-lg text-slate-600 mb-6">
+                  We provide residential plumbing help to homeowners across every neighbourhood in {SERVICE_AREA} — from the core to the suburbs.
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {["St. Vital", "Transcona", "St. James", "Fort Garry", "River Heights", "North Kildonan", "Southdale", "Sage Creek", "Winnipeg Perimeter"].map(area => (
-                    <Badge key={area} variant="secondary" className="bg-white border-slate-200 text-slate-700 font-medium py-1 px-3">
-                      <MapPin className="h-3 w-3 mr-1 opacity-50" />
-                      {area}
-                    </Badge>
-                  ))}
+                <div className="inline-flex items-center gap-3 bg-white border border-slate-200 rounded-full px-5 py-3 shadow-sm">
+                  <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span className="font-semibold text-slate-800">All Winnipeg neighbourhoods welcome</span>
                 </div>
               </div>
               <div className="rounded-xl overflow-hidden shadow-md h-[400px] border border-slate-200">
