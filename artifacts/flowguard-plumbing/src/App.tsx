@@ -5,7 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Droplets, Menu, X, Phone, CheckCircle2, Clock, Wrench, ShieldCheck, MapPin, Droplet, Hammer, Bath, Shield, FileText, ArrowRight } from "lucide-react";
+import { Droplets, Menu, X, Phone, CheckCircle2, Clock, Wrench, ShieldCheck, MapPin, Droplet, Hammer, Bath, Shield, FileText, ArrowRight, Loader2 } from "lucide-react";
+import plumbersImg from "@/assets/plumbers.png";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -43,6 +44,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -57,27 +60,49 @@ function Home() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    // To use a real backend (e.g. EmailJS, Resend, or your own API),
-    // replace the mailto logic below with an API call:
-    // fetch('/api/contact', { method: 'POST', body: JSON.stringify(data) })
-    
-    const subject = encodeURIComponent(`New Plumbing Service Request — ${data.fullName}`);
-    const body = encodeURIComponent(`
-Name: ${data.fullName}
-Phone: ${data.phone}
-Email: ${data.email}
-Service Needed: ${data.service}
-Urgency: ${data.urgency}
-Date Needed By: ${data.dateNeeded || 'Not specified'}
-
-Description:
-${data.description || 'None provided'}
-    `);
-
-    window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
-    toast("Thanks — your request has been received. For urgent issues, please call 431-997-3415.");
-    form.reset();
+  // ---------------------------------------------------------------------------
+  // Lead submission
+  //
+  // Posts to the shared API server at POST /api/leads, which:
+  //   1. Saves the lead to PostgreSQL (so leads are never lost).
+  //   2. Sends a notification email to priypatel008@gmail.com via Resend
+  //      (only when RESEND_API_KEY is configured on the server).
+  //
+  // To change the destination email, update artifacts/api-server/src/lib/email.ts
+  // (NOTIFICATION_TO). To switch providers (SendGrid, Postmark, Nodemailer, etc.)
+  // replace the sendLeadEmail() implementation in that same file.
+  // ---------------------------------------------------------------------------
+  const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      const resp = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = (await resp.json().catch(() => ({}))) as {
+        ok?: boolean;
+        emailSent?: boolean;
+      };
+      if (!resp.ok || !json.ok) {
+        throw new Error("Request failed");
+      }
+      setDidSubmit(true);
+      toast.success(
+        "Thanks — your request has been received. For urgent issues, please call " +
+          PHONE_DISPLAY +
+          ".",
+      );
+      form.reset();
+    } catch (err) {
+      toast.error(
+        "We couldn't submit your request. Please call " +
+          PHONE_DISPLAY +
+          " and we'll help right away.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const scrollTo = (id: string) => {
@@ -354,55 +379,109 @@ ${data.description || 'None provided'}
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-20 lg:py-28 bg-slate-50 border-y border-slate-200">
+        <section id="how-it-works" className="py-16 md:py-24 lg:py-28 bg-slate-50 border-y border-slate-200">
           <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">How It Works</h2>
-              <p className="text-lg text-muted-foreground">Our simple, stress-free process for Winnipeg homeowners.</p>
+              <p className="text-base md:text-lg text-muted-foreground">Our simple, stress-free process for Winnipeg homeowners.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
-              {/* Connecting line for desktop */}
-              <div className="hidden md:block absolute top-12 left-1/8 right-1/8 h-0.5 bg-slate-200 -z-10" />
+            {/* Mobile: horizontal row layout (number | icon | text) for compact, scannable list.
+                Desktop: 4-column grid. */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8 max-w-5xl mx-auto">
+              {[
+                { n: 1, icon: Phone, text: "Tell us what plumbing issue you're dealing with" },
+                { n: 2, icon: FileText, text: "We review your request and confirm availability" },
+                { n: 3, icon: ShieldCheck, text: "A plumbing professional provides a quote before starting" },
+                { n: 4, icon: CheckCircle2, text: "The job gets completed professionally" },
+              ].map(({ n, icon: Icon, text }) => (
+                <div
+                  key={n}
+                  className="flex md:flex-col items-center md:items-center gap-4 md:gap-0 md:text-center bg-white md:bg-transparent rounded-xl md:rounded-none border md:border-0 border-slate-200 p-4 md:p-0 shadow-sm md:shadow-none"
+                >
+                  {/* Number + icon row — kept side-by-side on mobile.
+                      On desktop, the number sits on top and icon below for vertical step layout. */}
+                  <div className="flex items-center gap-3 md:flex-col md:gap-3 flex-shrink-0">
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg md:text-xl font-bold shadow-md flex-shrink-0">
+                      {n}
+                    </div>
+                    <div className="bg-primary/10 p-2.5 md:p-3 rounded-full flex-shrink-0">
+                      <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                    </div>
+                  </div>
+                  <p className="font-medium text-base md:text-lg leading-snug text-left md:text-center md:mt-4">
+                    {text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-16 h-16 rounded-full bg-white border-2 border-primary flex items-center justify-center text-2xl font-bold text-primary mb-6 shadow-sm">
-                  1
+        {/* Local Pros Section — uses the supplied photo of plumbing professionals */}
+        <section className="py-16 md:py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5 }}
+                className="relative order-2 lg:order-1"
+              >
+                <div className="rounded-2xl overflow-hidden shadow-xl shadow-slate-300/40 border border-slate-200">
+                  <img
+                    src={plumbersImg}
+                    alt="Plumbing professionals reviewing a service quote in a Winnipeg home"
+                    className="w-full h-auto block"
+                    loading="lazy"
+                  />
                 </div>
-                <div className="bg-primary/10 p-3 rounded-full mb-4">
-                  <Phone className="h-6 w-6 text-primary" />
+                {/* Floating badge */}
+                <div className="hidden sm:flex absolute -bottom-5 -right-5 bg-primary text-primary-foreground rounded-xl px-5 py-3 shadow-lg shadow-primary/20 items-center gap-3">
+                  <ShieldCheck className="h-6 w-6" />
+                  <div>
+                    <div className="text-xs uppercase tracking-wide opacity-80">Quote First</div>
+                    <div className="font-bold text-sm">Before any work begins</div>
+                  </div>
                 </div>
-                <p className="font-medium text-lg leading-snug">Tell us what plumbing issue you're dealing with</p>
-              </div>
+              </motion.div>
 
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-16 h-16 rounded-full bg-white border-2 border-primary flex items-center justify-center text-2xl font-bold text-primary mb-6 shadow-sm">
-                  2
+              <div className="order-1 lg:order-2">
+                <Badge variant="outline" className="w-fit mb-4 text-primary border-primary/20 bg-primary/5">
+                  Real Plumbing Pros
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 leading-tight">
+                  Friendly help from people who do this for a living.
+                </h2>
+                <p className="text-base md:text-lg text-slate-600 mb-6 leading-relaxed">
+                  We connect Winnipeg homeowners with qualified plumbing professionals who walk you through the issue, explain the fix in plain language, and give you a clear quote before any work starts. No pressure, no surprises — just real help.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-700">Clear explanations, no jargon</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-700">Quote and scope confirmed before tools come out</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-slate-700">Tidy work — your home is left how we found it</span>
+                  </li>
+                </ul>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button asChild size="lg" className="h-12">
+                    <a href={`tel:${PHONE_TEL}`}>
+                      <Phone className="mr-2 h-4 w-4" />
+                      Call {PHONE_DISPLAY}
+                    </a>
+                  </Button>
+                  <Button onClick={() => scrollTo('request-service')} size="lg" variant="outline" className="h-12">
+                    Request Service
+                  </Button>
                 </div>
-                <div className="bg-primary/10 p-3 rounded-full mb-4">
-                  <FileText className="h-6 w-6 text-primary" />
-                </div>
-                <p className="font-medium text-lg leading-snug">We review your request and confirm availability</p>
-              </div>
-
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-16 h-16 rounded-full bg-white border-2 border-primary flex items-center justify-center text-2xl font-bold text-primary mb-6 shadow-sm">
-                  3
-                </div>
-                <div className="bg-primary/10 p-3 rounded-full mb-4">
-                  <ShieldCheck className="h-6 w-6 text-primary" />
-                </div>
-                <p className="font-medium text-lg leading-snug">A plumbing professional provides a quote before starting</p>
-              </div>
-
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-primary-foreground mb-6 shadow-md">
-                  4
-                </div>
-                <div className="bg-primary/10 p-3 rounded-full mb-4">
-                  <CheckCircle2 className="h-6 w-6 text-primary" />
-                </div>
-                <p className="font-medium text-lg leading-snug">The job gets completed professionally</p>
               </div>
             </div>
           </div>
@@ -604,8 +683,22 @@ ${data.description || 'None provided'}
                           )}
                         />
 
-                        <Button type="submit" size="lg" className="w-full text-base h-12 mt-4">
-                          Request Service <ArrowRight className="ml-2 h-4 w-4" />
+                        <Button type="submit" size="lg" disabled={isSubmitting} className="w-full text-base h-12 mt-4">
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Sending...
+                            </>
+                          ) : didSubmit ? (
+                            <>
+                              <CheckCircle2 className="mr-2 h-4 w-4" />
+                              Send Another Request
+                            </>
+                          ) : (
+                            <>
+                              Request Service <ArrowRight className="ml-2 h-4 w-4" />
+                            </>
+                          )}
                         </Button>
                         <p className="text-xs text-center text-slate-500 mt-4">
                           For immediate urgent assistance, please skip this form and <a href={`tel:${PHONE_TEL}`} className="text-primary font-medium hover:underline">call {PHONE_DISPLAY}</a> directly.
