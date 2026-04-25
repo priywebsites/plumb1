@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "pnpm --filter @workspace/flowguard-plumbing build",
-  "outputDirectory": "artifacts/flowguard-plumbing/dist/public",
+  "outputDirectory": "dist/public",
   "framework": null,
   "build": {
     "env": {
