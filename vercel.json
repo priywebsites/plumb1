@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm --filter @workspace/flowguard-plumbing build",
+  "outputDirectory": "artifacts/flowguard-plumbing/dist/public",
+  "framework": null,
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "PORT": "3000",
+      "BASE_PATH": "/"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
+  ]
+}
