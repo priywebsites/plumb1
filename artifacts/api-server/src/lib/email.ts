@@ -1,8 +1,34 @@
+import nodemailer, { type Transporter } from "nodemailer";
 import { logger } from "./logger";
 
-// To: business owner inbox. Hardcoded per requirements.
-const NOTIFICATION_TO = "priypatel008@gmail.com";
-const NOTIFICATION_SUBJECT_PREFIX = "New Plumbing Service Request";
+// =============================================================================
+// Lead notification email — Gmail SMTP via Nodemailer
+// =============================================================================
+//
+// Where this lives:
+//   Backend route:    artifacts/api-server/src/routes/leads.ts  (POST /api/contact)
+//   Email transport:  artifacts/api-server/src/lib/email.ts     (this file)
+//
+// How to update the receiving email:
+//   Change the LEAD_TO_EMAIL Replit Secret / environment variable.
+//   (Currently set to priypatel008@gmail.com.)
+//
+// How to update the Gmail SMTP account:
+//   1. Sign in to the new Gmail account at https://myaccount.google.com/
+//   2. Enable 2-Step Verification.
+//   3. Create an App Password (Mail / Other) at
+//      https://myaccount.google.com/apppasswords
+//   4. Update the SMTP_USER and SMTP_PASS Replit Secrets with the new
+//      Gmail address and the 16-character app password.
+//
+// SECURITY:
+//   SMTP_USER, SMTP_PASS, and LEAD_TO_EMAIL must ONLY live in Replit Secrets /
+//   environment variables. They must never be hardcoded in source files and
+//   must never be referenced from the frontend / browser bundle. This module
+//   runs on the Express API server only.
+// =============================================================================
+
+const SUBJECT = "New Plumbing Lead - FlowGuard Winnipeg Plumbing";
 
 type LeadEmailInput = {
   fullName: string;
@@ -12,54 +38,31 @@ type LeadEmailInput = {
   description?: string | null;
   dateNeeded?: string | null;
   urgency: string;
+  source?: string | null;
 };
 
 type EmailResult =
   | { sent: true }
-  | { sent: false; reason: "no_resend_key" | "resend_error" | "exception" };
+  | { sent: false; reason: "missing_smtp_config" | "smtp_error" | "exception" };
 
-function buildSubject(lead: LeadEmailInput): string {
-  return `${NOTIFICATION_SUBJECT_PREFIX} — ${lead.fullName} (${lead.urgency})`;
-}
+let cachedTransporter: Transporter | null = null;
 
-function buildHtml(lead: LeadEmailInput): string {
-  const row = (label: string, value: string | null | undefined) => `
-    <tr>
-      <td style="padding:8px 12px;background:#f1f5f9;font-weight:600;color:#0f172a;width:180px;border:1px solid #e2e8f0;">${label}</td>
-      <td style="padding:8px 12px;color:#0f172a;border:1px solid #e2e8f0;">${value ? escapeHtml(value) : "—"}</td>
-    </tr>`;
-  return `
-    <div style="font-family:Inter,Arial,sans-serif;color:#0f172a;max-width:640px;">
-      <h2 style="color:#0f172a;margin:0 0 8px;">New plumbing service request</h2>
-      <p style="color:#475569;margin:0 0 16px;">A new request was submitted on the FlowGuard Winnipeg Plumbing website.</p>
-      <table style="border-collapse:collapse;width:100%;font-size:14px;">
-        ${row("Name", lead.fullName)}
-        ${row("Phone", lead.phone)}
-        ${row("Email", lead.email)}
-        ${row("Service Needed", lead.service)}
-        ${row("Urgency", lead.urgency)}
-        ${row("Date Needed By", lead.dateNeeded)}
-        ${row("Description", lead.description)}
-      </table>
-      <p style="color:#64748b;font-size:12px;margin-top:16px;">Submitted ${new Date().toLocaleString("en-CA", { timeZone: "America/Winnipeg" })} (Winnipeg time)</p>
-    </div>
-  `;
-}
-
-function buildText(lead: LeadEmailInput): string {
-  return [
-    "New plumbing service request",
-    "",
-    `Name: ${lead.fullName}`,
-    `Phone: ${lead.phone}`,
-    `Email: ${lead.email}`,
-    `Service Needed: ${lead.service}`,
-    `Urgency: ${lead.urgency}`,
-    `Date Needed By: ${lead.dateNeeded ?? "—"}`,
-    "",
-    "Description:",
-    lead.description ?? "—",
-  ].join("\n");
+function getTransporter(): Transporter | null {
+  const user = process.env["SMTP_USER"];
+  const pass = process.env["SMTP_PASS"];
+  if (!user || !pass) {
+    return null;
+  }
+  if (cachedTransporter) {
+    return cachedTransporter;
+  }
+  cachedTransporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: { user, pass },
+  });
+  return cachedTransporter;
 }
 
 function escapeHtml(s: string): string {
@@ -71,62 +74,81 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function buildText(lead: LeadEmailInput, submittedAt: string): string {
+  return [
+    "New plumbing service request — FlowGuard Winnipeg Plumbing",
+    "",
+    `Full Name: ${lead.fullName}`,
+    `Phone Number: ${lead.phone}`,
+    `Email Address: ${lead.email}`,
+    `Service Needed: ${lead.service}`,
+    `Description / Requirements: ${lead.description?.trim() || "—"}`,
+    `Date Needed By: ${lead.dateNeeded?.trim() || "—"}`,
+    `Urgency: ${lead.urgency}`,
+    `Page / Form Source: ${lead.source?.trim() || "Website request form"}`,
+    `Submission Time: ${submittedAt}`,
+  ].join("\n");
+}
+
+function buildHtml(lead: LeadEmailInput, submittedAt: string): string {
+  const row = (label: string, value: string | null | undefined) => `
+    <tr>
+      <td style="padding:8px 12px;background:#f1f5f9;font-weight:600;color:#0f172a;width:200px;border:1px solid #e2e8f0;vertical-align:top;">${label}</td>
+      <td style="padding:8px 12px;color:#0f172a;border:1px solid #e2e8f0;white-space:pre-wrap;">${value ? escapeHtml(value) : "—"}</td>
+    </tr>`;
+  return `
+    <div style="font-family:Inter,Arial,sans-serif;color:#0f172a;max-width:680px;">
+      <h2 style="color:#0f172a;margin:0 0 8px;">New Plumbing Lead</h2>
+      <p style="color:#475569;margin:0 0 16px;">A homeowner submitted the request form on the FlowGuard Winnipeg Plumbing website.</p>
+      <table style="border-collapse:collapse;width:100%;font-size:14px;">
+        ${row("Full Name", lead.fullName)}
+        ${row("Phone Number", lead.phone)}
+        ${row("Email Address", lead.email)}
+        ${row("Service Needed", lead.service)}
+        ${row("Description / Requirements", lead.description)}
+        ${row("Date Needed By", lead.dateNeeded)}
+        ${row("Urgency", lead.urgency)}
+        ${row("Page / Form Source", lead.source ?? "Website request form")}
+        ${row("Submission Time", submittedAt)}
+      </table>
+    </div>
+  `;
+}
+
 /**
- * Send a lead notification email via Resend.
- *
- * Configure by setting environment variables:
- *   - RESEND_API_KEY  (required)
- *   - RESEND_FROM     (optional, defaults to "FlowGuard Plumbing <onboarding@resend.dev>")
- *
- * The "onboarding@resend.dev" sender works without verifying a domain but is
- * limited to the Resend account's own email address. To send to
- * priypatel008@gmail.com from any address, verify a domain in Resend and set
- * RESEND_FROM to something like "FlowGuard <leads@yourdomain.com>".
+ * Send the lead notification email via Gmail SMTP.
+ * Reads SMTP_USER, SMTP_PASS, and LEAD_TO_EMAIL from Replit Secrets /
+ * environment variables. Never call this from frontend code.
  */
 export async function sendLeadEmail(lead: LeadEmailInput): Promise<EmailResult> {
-  const apiKey = process.env["RESEND_API_KEY"];
-  if (!apiKey) {
+  const transporter = getTransporter();
+  const to = process.env["LEAD_TO_EMAIL"];
+
+  if (!transporter || !to) {
     logger.warn(
-      { lead: { name: lead.fullName, email: lead.email } },
-      "RESEND_API_KEY not set — skipping email send (lead is still stored in DB)",
+      "SMTP_USER, SMTP_PASS, or LEAD_TO_EMAIL not set — skipping email send (lead is still stored in DB).",
     );
-    return { sent: false, reason: "no_resend_key" };
+    return { sent: false, reason: "missing_smtp_config" };
   }
 
-  const from =
-    process.env["RESEND_FROM"] ?? "FlowGuard Plumbing <onboarding@resend.dev>";
-
-  const payload = {
-    from,
-    to: [NOTIFICATION_TO],
-    reply_to: lead.email,
-    subject: buildSubject(lead),
-    html: buildHtml(lead),
-    text: buildText(lead),
-  };
+  const submittedAt = new Date().toLocaleString("en-CA", {
+    timeZone: "America/Winnipeg",
+    dateStyle: "full",
+    timeStyle: "short",
+  });
 
   try {
-    const resp = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(payload),
+    await transporter.sendMail({
+      from: `FlowGuard Winnipeg Plumbing <${process.env["SMTP_USER"]}>`,
+      to,
+      replyTo: lead.email,
+      subject: SUBJECT,
+      text: buildText(lead, submittedAt),
+      html: buildHtml(lead, submittedAt),
     });
-
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => "<no body>");
-      logger.error(
-        { status: resp.status, body: body.slice(0, 500) },
-        "Resend API returned an error",
-      );
-      return { sent: false, reason: "resend_error" };
-    }
-
     return { sent: true };
   } catch (err) {
-    logger.error({ err }, "Resend request failed");
-    return { sent: false, reason: "exception" };
+    logger.error({ err }, "Nodemailer/Gmail SMTP send failed");
+    return { sent: false, reason: "smtp_error" };
   }
 }

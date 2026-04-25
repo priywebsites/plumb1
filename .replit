@@ -33,3 +33,9 @@ externalPort = 3000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+SMTP_USER = "mail.websols@gmail.com"
+LEAD_TO_EMAIL = "priypatel008@gmail.com"

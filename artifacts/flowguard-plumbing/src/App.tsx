@@ -63,22 +63,33 @@ function Home() {
   // ---------------------------------------------------------------------------
   // Lead submission
   //
-  // Posts to the shared API server at POST /api/leads, which:
-  //   1. Saves the lead to PostgreSQL (so leads are never lost).
-  //   2. Sends a notification email to priypatel008@gmail.com via Resend
-  //      (only when RESEND_API_KEY is configured on the server).
+  // Posts to the shared API server at POST /api/contact, which:
+  //   1. Saves the submission to PostgreSQL (so leads are never lost).
+  //   2. Sends a notification email to LEAD_TO_EMAIL via Gmail SMTP using
+  //      Nodemailer.
   //
-  // To change the destination email, update artifacts/api-server/src/lib/email.ts
-  // (NOTIFICATION_TO). To switch providers (SendGrid, Postmark, Nodemailer, etc.)
-  // replace the sendLeadEmail() implementation in that same file.
+  // The email route lives at:        artifacts/api-server/src/routes/leads.ts
+  // The email transport lives at:    artifacts/api-server/src/lib/email.ts
+  //
+  // To change the receiving email:   update LEAD_TO_EMAIL in Replit Secrets.
+  // To change the Gmail SMTP account: update SMTP_USER and SMTP_PASS in
+  //                                   Replit Secrets (use a Gmail App Password).
+  // SMTP credentials must stay in Replit Secrets / environment variables —
+  // never hardcode them in frontend or backend source files.
   // ---------------------------------------------------------------------------
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
-      const resp = await fetch("/api/leads", {
+      const resp = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          source:
+            typeof window !== "undefined"
+              ? `Website request form (${window.location.pathname})`
+              : "Website request form",
+        }),
       });
       const json = (await resp.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -89,17 +100,11 @@ function Home() {
       }
       setDidSubmit(true);
       toast.success(
-        "Thanks — your request has been received. For urgent issues, please call " +
-          PHONE_DISPLAY +
-          ".",
+        "Thanks — your request has been received. For urgent issues, please call 431-997-3415.",
       );
       form.reset();
     } catch (err) {
-      toast.error(
-        "We couldn't submit your request. Please call " +
-          PHONE_DISPLAY +
-          " and we'll help right away.",
-      );
+      toast.error("Something went wrong. Please call 431-997-3415.");
     } finally {
       setIsSubmitting(false);
     }
@@ -700,6 +705,13 @@ function Home() {
                             </>
                           )}
                         </Button>
+                        {/*
+                          Submit handler: see onSubmit() above.
+                          Posts to POST /api/contact (artifacts/api-server/src/routes/leads.ts).
+                          Email transport (Nodemailer + Gmail SMTP) lives in
+                          artifacts/api-server/src/lib/email.ts. SMTP_USER, SMTP_PASS, and
+                          LEAD_TO_EMAIL are read from Replit Secrets — never hardcoded here.
+                        */}
                         <p className="text-xs text-center text-slate-500 mt-4">
                           For immediate urgent assistance, please skip this form and <a href={`tel:${PHONE_TEL}`} className="text-primary font-medium hover:underline">call {PHONE_DISPLAY}</a> directly.
                         </p>
