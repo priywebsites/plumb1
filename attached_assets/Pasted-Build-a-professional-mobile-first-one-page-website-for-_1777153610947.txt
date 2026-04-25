@@ -1,0 +1,181 @@
+Build a professional, mobile-first one-page website for a residential plumbing business in Winnipeg, Manitoba.
+
+Business name: **FlowGuard Winnipeg Plumbing**
+
+Business location/service area: Winnipeg, Manitoba only.
+
+Important contact details:
+
+* All phone call buttons must call: **4319973415**
+* All submitted lead forms must send the lead details to: **[priypatel008@gmail.com](mailto:priypatel008@gmail.com)**
+
+Website style:
+
+* Clean, trustworthy, local plumbing company feel
+* Blue, white, dark gray color palette
+* Mobile-first layout
+* Professional but not overly corporate
+* Fast loading
+* Clear call-to-action buttons throughout
+* No fake reviews
+* No fake license numbers
+* Do not claim “licensed and insured” unless stated generally as “work completed by qualified plumbing professionals”
+
+Website sections:
+
+1. Header
+
+* Logo text: FlowGuard Winnipeg Plumbing
+* Navigation links: Services, How It Works, Request Service, Contact
+* Sticky “Call Now” button linking to tel:4319973415
+
+2. Hero Section
+   Headline:
+   “Need a Plumber in Winnipeg?”
+
+Subheadline:
+“Fast residential plumbing help for repairs, replacements, installs, leaks, water heaters, sump pumps, and urgent issues.”
+
+Buttons:
+
+* “Call Now” → tel:4319973415
+* “Request Service” → scrolls to the lead form
+
+Add trust line:
+“Winnipeg residential plumbing • Same-day availability when possible • Quote before work starts”
+
+3. Urgent Call Banner
+   Create a noticeable banner under the hero:
+   “Urgent plumbing issue? Call now for faster help.”
+   Button: “Call 431-997-3415” → tel:4319973415
+
+4. Services Section
+   Title:
+   “Residential Plumbing Services in Winnipeg”
+
+Display these 10 service cards:
+
+1. Water Heater Services
+2. Sump Pump & Basement Protection
+3. Water Softener & Filtration
+4. Bathroom Plumbing
+5. Kitchen Plumbing
+6. Leak Detection & Pipe Repairs
+7. Basement Bathroom Plumbing
+8. Fixture Installation & Replacement
+9. Residential Plumbing Repairs
+10. Need Something Else? Give Us a Call
+
+Each service card should have a short 1-sentence description.
+
+5. How It Works Section
+   Title:
+   “How It Works”
+
+Steps:
+
+1. Tell us what plumbing issue you’re dealing with
+
+2. We review your request and confirm availability
+
+3. A plumbing professional provides a quote before starting
+
+4. The job gets completed professionally
+
+5. Why Choose Us Section
+   Include these points:
+
+* Local Winnipeg residential plumbing help
+* Fast response for urgent issues
+* Clear quotes before work begins
+* Help with repairs, replacements, installs, and upgrades
+* Simple booking by phone or online form
+
+7. Lead Form Section
+   Title:
+   “Request Plumbing Service”
+
+Create a lead form with these fields:
+
+* Full Name
+* Phone Number
+* Email Address
+* Service Needed dropdown with these options:
+
+  * Water Heater Services
+  * Sump Pump & Basement Protection
+  * Water Softener & Filtration
+  * Bathroom Plumbing
+  * Kitchen Plumbing
+  * Leak Detection & Pipe Repairs
+  * Basement Bathroom Plumbing
+  * Fixture Installation & Replacement
+  * Residential Plumbing Repairs
+  * Other
+* Description / Requirements textarea
+* Date Needed By
+* Urgency dropdown:
+
+  * Urgent / Same Day
+  * Within 1–2 Days
+  * This Week
+  * Flexible
+
+When the form is submitted, send all lead details to:
+**[priypatel008@gmail.com](mailto:priypatel008@gmail.com)**
+
+If email sending cannot be done directly without a backend/API key, create the form frontend and add clear instructions in the code comments for connecting EmailJS, Formspree, Resend, or a backend email route.
+
+After form submission, show a success message:
+“Thanks — your request has been received. For urgent issues, please call 431-997-3415.”
+
+8. Multiple Call CTAs
+   Add phone call buttons in:
+
+* Header
+* Hero
+* Urgent banner
+* After services section
+* Contact section
+  All call buttons must link to:
+  tel:4319973415
+
+9. Service Area Section
+   Title:
+   “Serving Winnipeg Homeowners”
+
+Text:
+“We provide residential plumbing help across Winnipeg, including St. Vital, Transcona, St. James, Fort Garry, River Heights, North Kildonan, Southdale, Sage Creek, and nearby areas.”
+
+10. Map Section
+    Add an embedded Google Maps-style section for Winnipeg, Manitoba service area. Do not use a fake business address. Use a general Winnipeg map/service-area embed instead.
+
+11. Contact Section
+    Title:
+    “Contact FlowGuard Winnipeg Plumbing”
+
+Include:
+Phone: 431-997-3415
+Email: [priypatel008@gmail.com](mailto:priypatel008@gmail.com)
+Service Area: Winnipeg, Manitoba
+Buttons:
+
+* “Call Now”
+* “Request Service”
+
+12. Footer
+    Include:
+    FlowGuard Winnipeg Plumbing
+    Residential plumbing service in Winnipeg, Manitoba
+
+Small disclaimer:
+“Plumbing work is completed by qualified plumbing professionals. Quotes, permits, licensing requirements, and workmanship are handled by the assigned plumbing contractor.”
+
+Technical requirements:
+
+* Build as a clean React website or HTML/CSS/JS app, whichever is easiest in Replit
+* Fully responsive for mobile and desktop
+* Smooth scroll for nav links
+* Use modern cards, rounded corners, and clean spacing
+* Make the design look real and trustworthy
+* Add comments in the code explaining where to update phone number, email, business name, and form handling
