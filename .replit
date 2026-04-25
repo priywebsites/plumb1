@@ -43,4 +43,3 @@ channel = "stable-25_05"
 [userenv.shared]
 SMTP_USER = "mail.websols@gmail.com"
 LEAD_TO_EMAIL = "priypatel008@gmail.com"
-SMTP_PASS = "licy igzp tcdp dnup"
