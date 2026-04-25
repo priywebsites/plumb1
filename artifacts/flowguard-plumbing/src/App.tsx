@@ -7,6 +7,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Droplets, Menu, X, Phone, CheckCircle2, Clock, Wrench, ShieldCheck, MapPin, Droplet, Hammer, Bath, Shield, FileText, ArrowRight, Loader2 } from "lucide-react";
 import plumbersImg from "@/assets/plumbers.png";
+import heroImg from "@/assets/hero.png";
+import secondImg from "@/assets/second.png";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -184,12 +186,15 @@ function Home() {
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-slate-50 pt-16 pb-24 lg:pt-24 lg:pb-32">
           <div className="absolute inset-0 z-0">
-            <img 
-              src="/hero.jpg" 
-              alt="Modern Winnipeg home" 
-              className="w-full h-full object-cover opacity-20"
+            <img
+              src={heroImg}
+              alt="Plumbing professionals working under a Winnipeg kitchen sink"
+              className="w-full h-full object-cover opacity-40"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+            {/* Soft left-to-right wash so the headline stays readable while the photo
+                still reads through clearly on the right side. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/0 to-background/60 md:hidden" />
           </div>
           
           <div className="container relative z-10 mx-auto px-4">
@@ -262,102 +267,52 @@ function Home() {
               <p className="text-lg text-muted-foreground">Professional help for everything from a dripping faucet to a full basement bathroom installation.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Droplet className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Water Heater Services</h3>
-                  <p className="text-muted-foreground">Repair, replacement, and installation of traditional and tankless water heaters.</p>
-                </CardContent>
-              </Card>
+            {/*
+              Compact services layout — converted from large vertical cards to a
+              denser 2-column (mobile) / 3-column (desktop) horizontal list.
+              Same icons, same titles, same descriptions — just less padding,
+              icon-on-the-left so each card takes far less vertical space, and
+              the "Need Something Else?" CTA collapses into a full-width strip
+              under the grid.
+            */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 max-w-6xl mx-auto">
+              {[
+                { icon: Droplet, title: "Water Heater Services", desc: "Repair, replacement, and installation of traditional and tankless water heaters." },
+                { icon: Shield, title: "Sump Pump & Basement Protection", desc: "Sump pump installs, battery backups, and preventative solutions for basement flooding." },
+                { icon: Droplets, title: "Water Softener & Filtration", desc: "Whole-home water softeners and filtration systems to improve your water quality." },
+                { icon: Bath, title: "Bathroom Plumbing", desc: "Toilet repairs, shower valves, tub installations, and sink fixture upgrades." },
+                { icon: Wrench, title: "Kitchen Plumbing", desc: "Kitchen sink installs, garburators, dishwasher lines, and ice maker connections." },
+                { icon: Droplet, title: "Leak Detection & Pipe Repairs", desc: "Locating and fixing hidden leaks, frozen pipes, and replacing old plumbing lines." },
+                { icon: Hammer, title: "Basement Bathroom Plumbing", desc: "Rough-ins and complete plumbing setups for new basement bathrooms." },
+                { icon: Wrench, title: "Fixture Installation & Replacement", desc: "Professional installation of owner-supplied or contractor-supplied plumbing fixtures." },
+                { icon: Wrench, title: "Residential Plumbing Repairs", desc: "General troubleshooting and repair for any household plumbing problems." },
+              ].map(({ icon: Icon, title, desc }) => (
+                <Card
+                  key={title}
+                  className="shadow-sm border-slate-200 hover:shadow-md hover:border-primary/30 transition-all group"
+                >
+                  <CardContent className="p-4 md:p-5 flex gap-3 md:gap-4 items-start">
+                    <div className="h-10 w-10 md:h-11 md:w-11 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-base md:text-[17px] font-semibold leading-snug mb-1">{title}</h3>
+                      <p className="text-sm text-muted-foreground leading-snug">{desc}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Shield className="h-6 w-6 text-primary" />
+            {/* Full-width "Need something else?" CTA strip under the grid. */}
+            <div className="mt-6 md:mt-8 max-w-6xl mx-auto">
+              <Card className="border-primary bg-primary/5">
+                <CardContent className="p-4 md:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                  <div>
+                    <h3 className="text-base md:text-lg font-bold">Need Something Else? Give Us a Call</h3>
+                    <p className="text-sm text-muted-foreground">If your plumbing issue isn't listed here, we can likely still help.</p>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Sump Pump & Basement Protection</h3>
-                  <p className="text-muted-foreground">Sump pump installs, battery backups, and preventative solutions for basement flooding.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Droplets className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Water Softener & Filtration</h3>
-                  <p className="text-muted-foreground">Whole-home water softeners and filtration systems to improve your water quality.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Bath className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Bathroom Plumbing</h3>
-                  <p className="text-muted-foreground">Toilet repairs, shower valves, tub installations, and sink fixture upgrades.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Wrench className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Kitchen Plumbing</h3>
-                  <p className="text-muted-foreground">Kitchen sink installs, garburators, dishwasher lines, and ice maker connections.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Droplet className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Leak Detection & Pipe Repairs</h3>
-                  <p className="text-muted-foreground">Locating and fixing hidden leaks, frozen pipes, and replacing old plumbing lines.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Hammer className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Basement Bathroom Plumbing</h3>
-                  <p className="text-muted-foreground">Rough-ins and complete plumbing setups for new basement bathrooms.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Wrench className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Fixture Installation & Replacement</h3>
-                  <p className="text-muted-foreground">Professional installation of owner-supplied or contractor-supplied plumbing fixtures.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow group">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Wrench className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Residential Plumbing Repairs</h3>
-                  <p className="text-muted-foreground">General troubleshooting and repair for any household plumbing problems.</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-sm border-primary bg-primary/5 lg:col-start-2 group transition-colors">
-                <CardContent className="p-6 flex flex-col items-center text-center h-full justify-center">
-                  <h3 className="text-xl font-bold mb-2">Need Something Else? Give Us a Call</h3>
-                  <p className="text-muted-foreground mb-6">If your plumbing issue isn't listed here, we can likely still help. Call to discuss your needs.</p>
-                  <Button asChild>
+                  <Button asChild className="flex-shrink-0">
                     <a href={`tel:${PHONE_TEL}`}>
                       <Phone className="mr-2 h-4 w-4" />
                       Call {PHONE_DISPLAY}
@@ -367,18 +322,46 @@ function Home() {
               </Card>
             </div>
             
-            <div className="mt-16 flex justify-center">
-               <div className="inline-flex items-center bg-slate-50 rounded-full p-2 pr-6 border border-slate-200">
-                 <div className="bg-primary text-primary-foreground rounded-full p-3 mr-4">
-                   <Phone className="h-5 w-5" />
-                 </div>
-                 <div>
-                   <p className="text-sm font-medium text-slate-500">Ready to schedule service?</p>
-                   <a href={`tel:${PHONE_TEL}`} className="text-lg font-bold text-slate-900 hover:text-primary transition-colors">
-                     Call {PHONE_DISPLAY}
-                   </a>
-                 </div>
-               </div>
+          </div>
+        </section>
+
+        {/* Featured Service Photo — sits between Services and How It Works.
+            Tightly cropped image with a short value-prop overlay so it works
+            as a visual break without adding much vertical space. */}
+        <section className="relative bg-slate-900">
+          <div className="container mx-auto px-4 py-10 md:py-16">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-800 max-w-6xl mx-auto">
+              <img
+                src={secondImg}
+                alt="FlowGuard plumber servicing a residential water heater in Winnipeg"
+                className="w-full h-[280px] sm:h-[360px] md:h-[440px] object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/55 to-transparent" />
+              <div className="absolute inset-0 flex items-center">
+                <div className="px-5 md:px-10 max-w-xl text-white">
+                  <Badge className="mb-3 md:mb-4 bg-primary/90 hover:bg-primary border-0">
+                    Water Heaters · Repairs · Installs
+                  </Badge>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3 md:mb-4">
+                    Done right the first time, by people who care.
+                  </h3>
+                  <p className="text-sm md:text-base text-slate-200 mb-5 md:mb-6 leading-relaxed">
+                    Whether it's a worn-out water heater or a stubborn leak under the sink, we walk you through the fix and quote it before any work begins.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button asChild size="lg" className="h-11 md:h-12">
+                      <a href={`tel:${PHONE_TEL}`}>
+                        <Phone className="mr-2 h-4 w-4" />
+                        Call {PHONE_DISPLAY}
+                      </a>
+                    </Button>
+                    <Button onClick={() => scrollTo('request-service')} size="lg" variant="secondary" className="h-11 md:h-12">
+                      Request Service
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -442,12 +425,13 @@ function Home() {
                     loading="lazy"
                   />
                 </div>
-                {/* Floating badge */}
-                <div className="hidden sm:flex absolute -bottom-5 -right-5 bg-primary text-primary-foreground rounded-xl px-5 py-3 shadow-lg shadow-primary/20 items-center gap-3">
-                  <ShieldCheck className="h-6 w-6" />
+                {/* Floating badge — visible on every breakpoint, but slightly
+                    smaller and inset on mobile so it doesn't run off the screen. */}
+                <div className="absolute -bottom-3 -right-2 sm:-bottom-5 sm:-right-5 bg-primary text-primary-foreground rounded-xl px-3 py-2 sm:px-5 sm:py-3 shadow-lg shadow-primary/20 flex items-center gap-2 sm:gap-3 max-w-[80%]">
+                  <ShieldCheck className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
                   <div>
-                    <div className="text-xs uppercase tracking-wide opacity-80">Quote First</div>
-                    <div className="font-bold text-sm">Before any work begins</div>
+                    <div className="text-[10px] sm:text-xs uppercase tracking-wide opacity-80 leading-tight">Quote First</div>
+                    <div className="font-bold text-xs sm:text-sm leading-tight">Before any work begins</div>
                   </div>
                 </div>
               </motion.div>
